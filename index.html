@@ -1,306 +1,380 @@
-import React, { useState } from 'react';
-import { ArrowRightLeft, Zap, Activity, CheckCircle, XCircle } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement ⇄ Transmission Converter (4-20 mA)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to ensure min-height covers the screen */
+        .min-h-screen {
+            min-height: 100vh;
+        }
+        /* Style for Lucide Icons (not directly included, using text for replacement) */
+        .icon {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
 
-export default function TransmissionConverter() {
-  const [mode, setMode] = useState('mToT'); // 'mToT' or 'tToM'
-  const [rangeMin, setRangeMin] = useState(0);
-  const [rangeMax, setRangeMax] = useState(100);
-  const [units, setUnits] = useState('PSI');
-  const [inputValue, setInputValue] = useState('');
-  const [result, setResult] = useState(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [quizMode, setQuizMode] = useState(false);
-  const [quizAnswer, setQuizAnswer] = useState('');
-  const [quizFeedback, setQuizFeedback] = useState(null);
+    <div id="app" class="max-w-4xl mx-auto">
+        </div>
 
-  // Standard transmission range: 4-20 mA
-  const TRANS_MIN = 4;
-  const TRANS_MAX = 20;
+    <script>
+        // --- CORE APPLICATION LOGIC (Adapted from React to Vanilla JS) ---
 
-  const calculateTransmission = (measurement) => {
-    const meas = parseFloat(measurement);
-    if (isNaN(meas)) return null;
-    
-    const span = rangeMax - rangeMin;
-    let transmission = TRANS_MIN + ((meas - rangeMin) / span) * (TRANS_MAX - TRANS_MIN);
-    
-    // Clamp transmission between 3.9 and 22 mA
-    transmission = Math.max(3.9, Math.min(22, transmission));
-    
-    return transmission.toFixed(2);
-  };
+        const APP_ELEMENT = document.getElementById('app');
+        const TRANS_MIN = 4;
+        const TRANS_MAX = 20;
 
-  const calculateMeasurement = (transmission) => {
-    const trans = parseFloat(transmission);
-    if (isNaN(trans)) return null;
-    
-    const span = rangeMax - rangeMin;
-    const measurement = rangeMin + ((trans - TRANS_MIN) / (TRANS_MAX - TRANS_MIN)) * span;
-    return measurement.toFixed(2);
-  };
+        // State variables (using a simple object to manage state)
+        let state = {
+            mode: 'mToT', // 'mToT' or 'tToM'
+            rangeMin: 0,
+            rangeMax: 100,
+            units: 'PSI',
+            inputValue: '',
+            result: null,
+            showExplanation: false,
+            quizMode: false,
+            quizAnswer: '',
+            quizFeedback: null,
+        };
 
-  const handleCalculate = () => {
-    if (!inputValue) return;
-    
-    let calculated;
-    if (mode === 'mToT') {
-      calculated = calculateTransmission(inputValue);
-    } else {
-      calculated = calculateMeasurement(inputValue);
-    }
-    
-    setResult(calculated);
-    setShowExplanation(true);
-    setQuizMode(false);
-    setQuizFeedback(null);
-  };
+        // Function to update state and re-render the application
+        function updateState(newState) {
+            state = { ...state, ...newState };
+            renderApp();
+        }
 
-  const generateQuiz = () => {
-    const randomMeas = Math.floor(Math.random() * (rangeMax - rangeMin) + rangeMin);
-    const correctAnswer = calculateTransmission(randomMeas);
-    
-    setInputValue(randomMeas.toString());
-    setResult(null);
-    setQuizAnswer('');
-    setQuizFeedback(null);
-    setQuizMode(true);
-    setMode('mToT');
-  };
+        // --- CONVERSION FUNCTIONS ---
 
-  const checkQuizAnswer = () => {
-    const correctAnswer = calculateTransmission(inputValue);
-    const userAnswer = parseFloat(quizAnswer);
-    
-    if (Math.abs(userAnswer - parseFloat(correctAnswer)) < 0.1) {
-      setQuizFeedback({ correct: true, answer: correctAnswer });
-    } else {
-      setQuizFeedback({ correct: false, answer: correctAnswer });
-    }
-  };
+        const calculateTransmission = (measurement) => {
+            const meas = parseFloat(measurement);
+            const rMin = parseFloat(state.rangeMin);
+            const rMax = parseFloat(state.rangeMax);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-          <h1 className="text-3xl font-bold text-indigo-900 mb-2">
-            Measurement ⇄ Transmission Converter
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Master the art of converting between measurement values and transmission signals (4-20 mA)
-          </p>
+            if (isNaN(meas) || isNaN(rMin) || isNaN(rMax) || rMax <= rMin) return null;
 
-          {/* Instrument Range Setup */}
-          <div className="bg-indigo-50 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-indigo-900 mb-4">Instrument Range Setup</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Min Value</label>
-                <input
-                  type="number"
-                  value={rangeMin}
-                  onChange={(e) => {
-                    const val = e.target.value === '' || e.target.value === '-' ? e.target.value : parseFloat(e.target.value);
-                    setRangeMin(val);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Max Value</label>
-                <input
-                  type="number"
-                  value={rangeMax}
-                  onChange={(e) => {
-                    const val = e.target.value === '' || e.target.value === '-' ? e.target.value : parseFloat(e.target.value);
-                    setRangeMax(val);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Units</label>
-                <select
-                  value={units}
-                  onChange={(e) => setUnits(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option>PSI</option>
-                  <option>°F</option>
-                  <option>°C</option>
-                  <option>GPM</option>
-                  <option>%</option>
-                </select>
-              </div>
-            </div>
-          </div>
+            const span = rMax - rMin;
+            let transmission = TRANS_MIN + ((meas - rMin) / span) * (TRANS_MAX - TRANS_MIN);
 
-          {/* Mode Selection */}
-          {!quizMode && (
-            <div className="flex gap-4 mb-6">
-              <button
-                onClick={() => setMode('mToT')}
-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                  mode === 'mToT'
-                    ? 'bg-indigo-600 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Zap size={20} />
-                Measurement → Transmission
-              </button>
-              <button
-                onClick={() => setMode('tToM')}
-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                  mode === 'tToM'
-                    ? 'bg-indigo-600 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <Activity size={20} />
-                Transmission → Measurement
-              </button>
-            </div>
-          )}
+            // Clamp transmission between 3.9 and 22 mA
+            transmission = Math.max(3.9, Math.min(22, transmission));
+            return transmission.toFixed(2);
+        };
 
-          {/* Calculator Interface */}
-          {!quizMode && (
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {mode === 'mToT' ? `Enter Measurement (${units})` : 'Enter Transmission (mA)'}
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-lg"
-                    placeholder={mode === 'mToT' ? `${rangeMin}-${rangeMax}` : '4-20'}
-                  />
-                </div>
-                <ArrowRightLeft className="text-indigo-600 mt-6" size={24} />
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {mode === 'mToT' ? 'Transmission (mA)' : `Measurement (${units})`}
-                  </label>
-                  <div className="px-4 py-3 bg-white border-2 border-indigo-300 rounded-lg text-lg font-semibold text-indigo-900">
-                    {result || '---'}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={handleCalculate}
-                className="w-full mt-4 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-              >
-                Calculate
-              </button>
-            </div>
-          )}
+        const calculateMeasurement = (transmission) => {
+            const trans = parseFloat(transmission);
+            const rMin = parseFloat(state.rangeMin);
+            const rMax = parseFloat(state.rangeMax);
 
-          {/* Quiz Mode */}
-          {quizMode && (
-            <div className="bg-yellow-50 rounded-lg p-6 mb-6 border-2 border-yellow-300">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-yellow-900">🎯 Quiz Challenge</h3>
-                <button
-                  onClick={() => setQuizMode(false)}
-                  className="text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-yellow-100 transition-colors"
-                >
-                  ← Back to Calculator
-                </button>
-              </div>
-              <p className="text-gray-700 mb-4">
-                If the measurement is <span className="font-bold text-2xl text-indigo-900">{inputValue} {units}</span>, what should the transmission signal be?
-              </p>
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Answer (mA)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={quizAnswer}
-                    onChange={(e) => setQuizAnswer(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-lg"
-                    placeholder="Enter mA value"
-                  />
-                </div>
-                <button
-                  onClick={checkQuizAnswer}
-                  className="bg-yellow-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
-                >
-                  Check Answer
-                </button>
-              </div>
-              
-              {quizFeedback && (
-                <div className={`mt-4 p-4 rounded-lg flex items-center gap-3 ${
-                  quizFeedback.correct ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'
-                }`}>
-                  {quizFeedback.correct ? <CheckCircle size={24} /> : <XCircle size={24} />}
-                  <div>
-                    <p className="font-semibold">
-                      {quizFeedback.correct ? '✓ Correct!' : '✗ Not quite right'}
+            if (isNaN(trans) || isNaN(rMin) || isNaN(rMax) || rMax <= rMin) return null;
+
+            const span = rMax - rMin;
+            const measurement = rMin + ((trans - TRANS_MIN) / (TRANS_MAX - TRANS_MIN)) * span;
+            return measurement.toFixed(2);
+        };
+
+        // --- HANDLERS ---
+
+        function handleCalculate() {
+            if (!state.inputValue) return;
+
+            let calculated;
+            if (state.mode === 'mToT') {
+                calculated = calculateTransmission(state.inputValue);
+            } else {
+                calculated = calculateMeasurement(state.inputValue);
+            }
+
+            updateState({
+                result: calculated,
+                showExplanation: true,
+                quizMode: false,
+                quizFeedback: null
+            });
+        }
+
+        function generateQuiz() {
+            const rMin = parseFloat(state.rangeMin);
+            const rMax = parseFloat(state.rangeMax);
+
+            if (rMax <= rMin) return;
+
+            // Generate a random integer measurement within the range
+            const randomMeas = Math.floor(Math.random() * (rMax - rMin + 1) + rMin);
+            
+            updateState({
+                inputValue: randomMeas.toString(),
+                result: null,
+                quizAnswer: '',
+                quizFeedback: null,
+                quizMode: true,
+                mode: 'mToT' // Quiz is always M -> T
+            });
+        }
+
+        function checkQuizAnswer() {
+            const correctAnswer = calculateTransmission(state.inputValue);
+            const userAnswer = parseFloat(state.quizAnswer);
+
+            if (isNaN(userAnswer) || correctAnswer === null) return;
+
+            if (Math.abs(userAnswer - parseFloat(correctAnswer)) < 0.1) {
+                updateState({ quizFeedback: { correct: true, answer: correctAnswer } });
+            } else {
+                updateState({ quizFeedback: { correct: false, answer: correctAnswer } });
+            }
+        }
+
+        // --- RENDER FUNCTION ---
+
+        function renderApp() {
+            const { mode, rangeMin, rangeMax, units, inputValue, result, showExplanation, quizMode, quizAnswer, quizFeedback } = state;
+
+            // Use innerHTML to update the entire component for simplicity
+            APP_ELEMENT.innerHTML = `
+                <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                    <h1 class="text-3xl font-bold text-indigo-900 mb-2">
+                        Measurement ⇄ Transmission Converter
+                    </h1>
+                    <p class="text-gray-600 mb-6">
+                        Master the art of converting between measurement values and transmission signals (4-20 mA)
                     </p>
-                    <p>The correct answer is {quizFeedback.answer} mA</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Explanation */}
-          {showExplanation && result && !quizMode && (
-            <div className="bg-green-50 rounded-lg p-6 mb-6 border-2 border-green-300">
-              <h3 className="text-lg font-semibold text-green-900 mb-3">📖 How This Works</h3>
-              {mode === 'mToT' ? (
-                <div className="text-gray-700 space-y-2">
-                  <p><strong>Checking Transmitter:</strong> At {inputValue} {units}, the transmitter should output {result} mA.</p>
-                  <p className="text-sm">Formula: 4 + ((Value - {rangeMin}) / {rangeMax - rangeMin}) × 16 = {result} mA</p>
-                  <p className="text-sm text-green-800 mt-3">
-                    <strong>Real-world use:</strong> If your transmitter reads {inputValue} {units} but outputs a different mA signal, it needs calibration or repair.
-                  </p>
-                </div>
-              ) : (
-                <div className="text-gray-700 space-y-2">
-                  <p><strong>Checking Receiver:</strong> A {inputValue} mA signal should display {result} {units}.</p>
-                  <p className="text-sm">Formula: {rangeMin} + (({inputValue} - 4) / 16) × {rangeMax - rangeMin} = {result} {units}</p>
-                  <p className="text-sm text-green-800 mt-3">
-                    <strong>Real-world use:</strong> Inject a {inputValue} mA test signal into the receiver. It should display {result} {units}.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+                    <div class="bg-indigo-50 rounded-lg p-6 mb-6">
+                        <h2 class="text-lg font-semibold text-indigo-900 mb-4">Instrument Range Setup</h2>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Min Value</label>
+                                <input
+                                    type="number"
+                                    id="rangeMin"
+                                    value="${rangeMin}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Max Value</label>
+                                <input
+                                    type="number"
+                                    id="rangeMax"
+                                    value="${rangeMax}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Units</label>
+                                <select
+                                    id="units"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option ${units === 'PSI' ? 'selected' : ''}>PSI</option>
+                                    <option ${units === '°F' ? 'selected' : ''}>°F</option>
+                                    <option ${units === '°C' ? 'selected' : ''}>°C</option>
+                                    <option ${units === 'GPM' ? 'selected' : ''}>GPM</option>
+                                    <option ${units === '%' ? 'selected' : ''}>%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-          {/* Practice Button */}
-          <button
-            onClick={generateQuiz}
-            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors"
-          >
-            🎲 Generate Practice Problem
-          </button>
-        </div>
+                    ${!quizMode ? `
+                        <div class="flex gap-4 mb-6">
+                            <button
+                                id="mToTBtn"
+                                class="flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                                    mode === 'mToT'
+                                        ? 'bg-indigo-600 text-white shadow-lg'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }"
+                            >
+                                <span class="icon">⚡</span>
+                                Measurement → Transmission
+                            </button>
+                            <button
+                                id="tToMBtn"
+                                class="flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                                    mode === 'tToM'
+                                        ? 'bg-indigo-600 text-white shadow-lg'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }"
+                            >
+                                <span class="icon">📈</span>
+                                Transmission → Measurement
+                            </button>
+                        </div>
+                    ` : ''}
 
-        {/* Quick Reference Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Reference</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">Standard Transmission</h3>
-              <p className="text-sm text-gray-700">4 mA = Minimum measurement</p>
-              <p className="text-sm text-gray-700">20 mA = Maximum measurement</p>
-              <p className="text-sm text-gray-700">12 mA = Mid-range (50%)</p>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-purple-900 mb-2">Troubleshooting Tips</h3>
-              <p className="text-sm text-gray-700">• 3.8 mA or below = Wire break</p>
-              <p className="text-sm text-gray-700">• 21+ mA = Fault or over-range</p>
-              <p className="text-sm text-gray-700">• Drifting signal = Calibration needed</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+                    ${!quizMode ? `
+                        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        ${mode === 'mToT' ? `Enter Measurement (${units})` : 'Enter Transmission (mA)'}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        id="inputValue"
+                                        value="${inputValue}"
+                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-lg"
+                                        placeholder="${mode === 'mToT' ? `${rangeMin}-${rangeMax}` : '4-20'}"
+                                    />
+                                </div>
+                                <span class="text-indigo-600 mt-6 icon">⇄</span>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        ${mode === 'mToT' ? 'Transmission (mA)' : `Measurement (${units})`}
+                                    </label>
+                                    <div class="px-4 py-3 bg-white border-2 border-indigo-300 rounded-lg text-lg font-semibold text-indigo-900">
+                                        ${result || '---'}
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                id="calculateBtn"
+                                class="w-full mt-4 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                            >
+                                Calculate
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    ${quizMode ? `
+                        <div class="bg-yellow-50 rounded-lg p-6 mb-6 border-2 border-yellow-300">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-yellow-900">🎯 Quiz Challenge</h3>
+                                <button
+                                    id="backToCalcBtn"
+                                    class="text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-yellow-100 transition-colors"
+                                >
+                                    ← Back to Calculator
+                                </button>
+                            </div>
+                            <p class="text-gray-700 mb-4">
+                                If the measurement is <span class="font-bold text-2xl text-indigo-900">${inputValue} ${units}</span>, what should the transmission signal be?
+                            </p>
+                            <div class="flex gap-4 items-end">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Your Answer (mA)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        id="quizAnswer"
+                                        value="${quizAnswer}"
+                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-lg"
+                                        placeholder="Enter mA value"
+                                    />
+                                </div>
+                                <button
+                                    id="checkQuizBtn"
+                                    class="bg-yellow-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
+                                >
+                                    Check Answer
+                                </button>
+                            </div>
+                            
+                            ${quizFeedback ? `
+                                <div class="mt-4 p-4 rounded-lg flex items-center gap-3 ${
+                                    quizFeedback.correct ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'
+                                }">
+                                    <span class="icon text-xl">${quizFeedback.correct ? '✅' : '❌'}</span>
+                                    <div>
+                                        <p class="font-semibold">
+                                            ${quizFeedback.correct ? '✓ Correct!' : '✗ Not quite right'}
+                                        </p>
+                                        <p>The correct answer is ${quizFeedback.answer} mA</p>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+
+                    ${showExplanation && result && !quizMode ? `
+                        <div class="bg-green-50 rounded-lg p-6 mb-6 border-2 border-green-300">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">📖 How This Works</h3>
+                            ${mode === 'mToT' ? `
+                                <div class="text-gray-700 space-y-2">
+                                    <p><strong>Checking Transmitter:</strong> At ${inputValue} ${units}, the transmitter should output ${result} mA.</p>
+                                    <p class="text-sm">Formula: ${TRANS_MIN} + ((Value - ${rangeMin}) / ${rangeMax - rangeMin}) × ${TRANS_MAX - TRANS_MIN} = ${result} mA</p>
+                                    <p class="text-sm text-green-800 mt-3">
+                                        <strong>Real-world use:</strong> If your transmitter reads ${inputValue} ${units} but outputs a different mA signal, it needs calibration or repair.
+                                    </p>
+                                </div>
+                            ` : `
+                                <div class="text-gray-700 space-y-2">
+                                    <p><strong>Checking Receiver:</strong> A ${inputValue} mA signal should display ${result} ${units}.</p>
+                                    <p class="text-sm">Formula: ${rangeMin} + ((${inputValue} - ${TRANS_MIN}) / ${TRANS_MAX - TRANS_MIN}) × ${rangeMax - rangeMin} = ${result} ${units}</p>
+                                    <p class="text-sm text-green-800 mt-3">
+                                        <strong>Real-world use:</strong> Inject a ${inputValue} mA test signal into the receiver. It should display ${result} ${units}.
+                                    </p>
+                                </div>
+                            `}
+                        </div>
+                    ` : ''}
+
+                    <button
+                        id="quizBtn"
+                        class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors"
+                    >
+                        <span class="icon">🎲</span> Generate Practice Problem
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Reference</h2>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-blue-900 mb-2">Standard Transmission</h3>
+                            <p class="text-sm text-gray-700">4 mA = Minimum measurement</p>
+                            <p class="text-sm text-gray-700">20 mA = Maximum measurement</p>
+                            <p class="text-sm text-gray-700">12 mA = Mid-range (50%)</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-purple-900 mb-2">Troubleshooting Tips</h3>
+                            <p class="text-sm text-gray-700">• 3.8 mA or below = Wire break</p>
+                            <p class="text-sm text-gray-700">• 21+ mA = Fault or over-range</p>
+                            <p class="text-sm text-gray-700">• Drifting signal = Calibration needed</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // --- ATTACH EVENT LISTENERS (crucial for functionality) ---
+
+            // Instrument Range Inputs
+            document.getElementById('rangeMin').onchange = (e) => updateState({ rangeMin: parseFloat(e.target.value) || 0 });
+            document.getElementById('rangeMax').onchange = (e) => updateState({ rangeMax: parseFloat(e.target.value) || 0 });
+            document.getElementById('units').onchange = (e) => updateState({ units: e.target.value });
+
+            if (!quizMode) {
+                // Mode Buttons
+                document.getElementById('mToTBtn').onclick = () => updateState({ mode: 'mToT', result: null, showExplanation: false });
+                document.getElementById('tToMBtn').onclick = () => updateState({ mode: 'tToM', result: null, showExplanation: false });
+                
+                // Calculator Input and Button
+                document.getElementById('inputValue').oninput = (e) => updateState({ inputValue: e.target.value });
+                document.getElementById('calculateBtn').onclick = handleCalculate;
+            }
+
+            if (quizMode) {
+                // Quiz Buttons and Input
+                document.getElementById('backToCalcBtn').onclick = () => updateState({ quizMode: false, inputValue: '', result: null, quizFeedback: null });
+                document.getElementById('quizAnswer').oninput = (e) => updateState({ quizAnswer: e.target.value });
+                document.getElementById('checkQuizBtn').onclick = checkQuizAnswer;
+            }
+
+            // Global Quiz Button
+            document.getElementById('quizBtn').onclick = generateQuiz;
+        }
+
+        // Initial render
+        renderApp();
+    </script>
+</body>
+</html>
