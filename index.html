@@ -489,8 +489,10 @@
         const TRANS_MAX = 20;
         
         function getRangeValues() {
-            const min = parseFloat(document.getElementById('rangeMin').value) || 0;
-            const max = parseFloat(document.getElementById('rangeMax').value) || 100;
+            const minInput = document.getElementById('rangeMin').value;
+            const maxInput = document.getElementById('rangeMax').value;
+            const min = minInput === '' || minInput === '-' ? 0 : parseFloat(minInput);
+            const max = maxInput === '' || maxInput === '-' ? 100 : parseFloat(maxInput);
             const units = document.getElementById('units').value;
             return { min, max, units };
         }
