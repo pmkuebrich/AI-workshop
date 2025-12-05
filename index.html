@@ -3,378 +3,627 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Measurement ⇄ Transmission Converter (4-20 mA)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Measurement ⇄ Transmission Converter</title>
     <style>
-        /* Custom styles to ensure min-height covers the screen */
-        .min-h-screen {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            padding: 20px;
             min-height: 100vh;
         }
-        /* Style for Lucide Icons (not directly included, using text for replacement) */
-        .icon {
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 0.5rem;
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #312e81;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .range-setup {
+            background: #eef2ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .range-setup h2 {
+            color: #312e81;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        
+        .mode-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .mode-btn.active {
+            background: #6366f1;
+            color: white;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
+        }
+        
+        .mode-btn.inactive {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .mode-btn.inactive:hover {
+            background: #e5e7eb;
+        }
+        
+        .calculator {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .calc-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+        }
+        
+        .calc-input {
+            flex: 1;
+        }
+        
+        .arrow {
+            color: #6366f1;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .calc-output {
+            flex: 1;
+        }
+        
+        .output-box {
+            padding: 12px;
+            background: white;
+            border: 2px solid #c7d2fe;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #312e81;
+            text-align: center;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+            margin-top: 16px;
+        }
+        
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+        
+        .btn-quiz {
+            background: linear-gradient(135deg, #9333ea 0%, #6366f1 100%);
+            color: white;
+        }
+        
+        .btn-quiz:hover {
+            opacity: 0.9;
+        }
+        
+        .explanation {
+            background: #d1fae5;
+            border: 2px solid #86efac;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .explanation h3 {
+            color: #065f46;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .explanation p {
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .explanation .formula {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .explanation .real-world {
+            font-size: 14px;
+            color: #065f46;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+        
+        .quiz-box {
+            background: #fef3c7;
+            border: 2px solid #fcd34d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .quiz-box h3 {
+            color: #78350f;
+            font-size: 18px;
+        }
+        
+        .back-btn {
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .back-btn:hover {
+            background: #fde68a;
+            color: #374151;
+        }
+        
+        .quiz-question {
+            color: #374151;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        
+        .quiz-value {
+            font-weight: bold;
+            font-size: 24px;
+            color: #312e81;
+        }
+        
+        .quiz-input-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+        }
+        
+        .quiz-input-row > div {
+            flex: 1;
+        }
+        
+        .btn-check {
+            background: #d97706;
+            color: white;
+            padding: 12px 24px;
+        }
+        
+        .btn-check:hover {
+            background: #b45309;
+        }
+        
+        .feedback {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .feedback-icon {
+            font-size: 24px;
+        }
+        
+        .reference {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+        
+        .reference h2 {
+            color: #111827;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+        
+        .ref-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .ref-card {
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .ref-card.blue {
+            background: #dbeafe;
+        }
+        
+        .ref-card.purple {
+            background: #f3e8ff;
+        }
+        
+        .ref-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .ref-card.blue h3 {
+            color: #1e3a8a;
+        }
+        
+        .ref-card.purple h3 {
+            color: #581c87;
+        }
+        
+        .ref-card p {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-3, .ref-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calc-row {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-
-    <div id="app" class="max-w-4xl mx-auto">
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Measurement ⇄ Transmission Converter</h1>
+            <p class="subtitle">Master the art of converting between measurement values and transmission signals (4-20 mA)</p>
+            
+            <!-- Range Setup -->
+            <div class="range-setup">
+                <h2>Instrument Range Setup</h2>
+                <div class="grid-3">
+                    <div>
+                        <label for="rangeMin">Min Value</label>
+                        <input type="number" id="rangeMin" value="0">
+                    </div>
+                    <div>
+                        <label for="rangeMax">Max Value</label>
+                        <input type="number" id="rangeMax" value="100">
+                    </div>
+                    <div>
+                        <label for="units">Units</label>
+                        <select id="units">
+                            <option>PSI</option>
+                            <option>°F</option>
+                            <option>°C</option>
+                            <option>GPM</option>
+                            <option>%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mode Selection -->
+            <div class="mode-buttons" id="modeButtons">
+                <button class="mode-btn active" data-mode="mToT">
+                    ⚡ Measurement → Transmission
+                </button>
+                <button class="mode-btn inactive" data-mode="tToM">
+                    📊 Transmission → Measurement
+                </button>
+            </div>
+            
+            <!-- Calculator -->
+            <div class="calculator" id="calculator">
+                <div class="calc-row">
+                    <div class="calc-input">
+                        <label for="inputValue" id="inputLabel">Enter Measurement (PSI)</label>
+                        <input type="number" step="0.01" id="inputValue" placeholder="0-100">
+                    </div>
+                    <div class="arrow">⇄</div>
+                    <div class="calc-output">
+                        <label id="outputLabel">Transmission (mA)</label>
+                        <div class="output-box" id="result">---</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="calculate()">Calculate</button>
+            </div>
+            
+            <!-- Quiz Mode -->
+            <div class="quiz-box hidden" id="quizBox">
+                <div class="quiz-header">
+                    <h3>🎯 Quiz Challenge</h3>
+                    <button class="back-btn" onclick="exitQuiz()">← Back to Calculator</button>
+                </div>
+                <p class="quiz-question">
+                    If the measurement is <span class="quiz-value" id="quizValue">50 PSI</span>, what should the transmission signal be?
+                </p>
+                <div class="quiz-input-row">
+                    <div>
+                        <label for="quizAnswer">Your Answer (mA)</label>
+                        <input type="number" step="0.01" id="quizAnswer" placeholder="Enter mA value">
+                    </div>
+                    <button class="btn btn-check" onclick="checkAnswer()">Check Answer</button>
+                </div>
+                <div id="feedback" class="feedback hidden">
+                    <span class="feedback-icon" id="feedbackIcon"></span>
+                    <div id="feedbackText"></div>
+                </div>
+            </div>
+            
+            <!-- Explanation -->
+            <div class="explanation hidden" id="explanation">
+                <h3>📖 How This Works</h3>
+                <div id="explanationContent"></div>
+            </div>
+            
+            <!-- Practice Button -->
+            <button class="btn btn-quiz" onclick="generateQuiz()">🎲 Generate Practice Problem</button>
         </div>
-
+        
+        <!-- Reference Card -->
+        <div class="reference">
+            <h2>Quick Reference</h2>
+            <div class="ref-grid">
+                <div class="ref-card blue">
+                    <h3>Standard Transmission</h3>
+                    <p>4 mA = Minimum measurement</p>
+                    <p>20 mA = Maximum measurement</p>
+                    <p>12 mA = Mid-range (50%)</p>
+                </div>
+                <div class="ref-card purple">
+                    <h3>Troubleshooting Tips</h3>
+                    <p>• 3.8 mA or below = Wire break</p>
+                    <p>• 21+ mA = Fault or over-range</p>
+                    <p>• Drifting signal = Calibration needed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        // --- CORE APPLICATION LOGIC (Adapted from React to Vanilla JS) ---
-
-        const APP_ELEMENT = document.getElementById('app');
+        let currentMode = 'mToT';
+        let quizCorrectAnswer = null;
         const TRANS_MIN = 4;
         const TRANS_MAX = 20;
-
-        // State variables (using a simple object to manage state)
-        let state = {
-            mode: 'mToT', // 'mToT' or 'tToM'
-            rangeMin: 0,
-            rangeMax: 100,
-            units: 'PSI',
-            inputValue: '',
-            result: null,
-            showExplanation: false,
-            quizMode: false,
-            quizAnswer: '',
-            quizFeedback: null,
-        };
-
-        // Function to update state and re-render the application
-        function updateState(newState) {
-            state = { ...state, ...newState };
-            renderApp();
+        
+        function getRangeValues() {
+            const min = parseFloat(document.getElementById('rangeMin').value) || 0;
+            const max = parseFloat(document.getElementById('rangeMax').value) || 100;
+            const units = document.getElementById('units').value;
+            return { min, max, units };
         }
-
-        // --- CONVERSION FUNCTIONS ---
-
-        const calculateTransmission = (measurement) => {
-            const meas = parseFloat(measurement);
-            const rMin = parseFloat(state.rangeMin);
-            const rMax = parseFloat(state.rangeMax);
-
-            if (isNaN(meas) || isNaN(rMin) || isNaN(rMax) || rMax <= rMin) return null;
-
-            const span = rMax - rMin;
-            let transmission = TRANS_MIN + ((meas - rMin) / span) * (TRANS_MAX - TRANS_MIN);
-
-            // Clamp transmission between 3.9 and 22 mA
+        
+        function calculateTransmission(measurement) {
+            const { min, max } = getRangeValues();
+            const span = max - min;
+            let transmission = TRANS_MIN + ((measurement - min) / span) * (TRANS_MAX - TRANS_MIN);
             transmission = Math.max(3.9, Math.min(22, transmission));
             return transmission.toFixed(2);
-        };
-
-        const calculateMeasurement = (transmission) => {
-            const trans = parseFloat(transmission);
-            const rMin = parseFloat(state.rangeMin);
-            const rMax = parseFloat(state.rangeMax);
-
-            if (isNaN(trans) || isNaN(rMin) || isNaN(rMax) || rMax <= rMin) return null;
-
-            const span = rMax - rMin;
-            const measurement = rMin + ((trans - TRANS_MIN) / (TRANS_MAX - TRANS_MIN)) * span;
+        }
+        
+        function calculateMeasurement(transmission) {
+            const { min, max } = getRangeValues();
+            const span = max - min;
+            const measurement = min + ((transmission - TRANS_MIN) / (TRANS_MAX - TRANS_MIN)) * span;
             return measurement.toFixed(2);
-        };
-
-        // --- HANDLERS ---
-
-        function handleCalculate() {
-            if (!state.inputValue) return;
-
-            let calculated;
-            if (state.mode === 'mToT') {
-                calculated = calculateTransmission(state.inputValue);
-            } else {
-                calculated = calculateMeasurement(state.inputValue);
-            }
-
-            updateState({
-                result: calculated,
-                showExplanation: true,
-                quizMode: false,
-                quizFeedback: null
-            });
         }
-
-        function generateQuiz() {
-            const rMin = parseFloat(state.rangeMin);
-            const rMax = parseFloat(state.rangeMax);
-
-            if (rMax <= rMin) return;
-
-            // Generate a random integer measurement within the range
-            const randomMeas = Math.floor(Math.random() * (rMax - rMin + 1) + rMin);
+        
+        function updateLabels() {
+            const { min, max, units } = getRangeValues();
+            const inputLabel = document.getElementById('inputLabel');
+            const outputLabel = document.getElementById('outputLabel');
             
-            updateState({
-                inputValue: randomMeas.toString(),
-                result: null,
-                quizAnswer: '',
-                quizFeedback: null,
-                quizMode: true,
-                mode: 'mToT' // Quiz is always M -> T
-            });
-        }
-
-        function checkQuizAnswer() {
-            const correctAnswer = calculateTransmission(state.inputValue);
-            const userAnswer = parseFloat(state.quizAnswer);
-
-            if (isNaN(userAnswer) || correctAnswer === null) return;
-
-            if (Math.abs(userAnswer - parseFloat(correctAnswer)) < 0.1) {
-                updateState({ quizFeedback: { correct: true, answer: correctAnswer } });
+            if (currentMode === 'mToT') {
+                inputLabel.textContent = `Enter Measurement (${units})`;
+                outputLabel.textContent = 'Transmission (mA)';
+                document.getElementById('inputValue').placeholder = `${min}-${max}`;
             } else {
-                updateState({ quizFeedback: { correct: false, answer: correctAnswer } });
+                inputLabel.textContent = 'Enter Transmission (mA)';
+                outputLabel.textContent = `Measurement (${units})`;
+                document.getElementById('inputValue').placeholder = '4-20';
             }
         }
-
-        // --- RENDER FUNCTION ---
-
-        function renderApp() {
-            const { mode, rangeMin, rangeMax, units, inputValue, result, showExplanation, quizMode, quizAnswer, quizFeedback } = state;
-
-            // Use innerHTML to update the entire component for simplicity
-            APP_ELEMENT.innerHTML = `
-                <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
-                    <h1 class="text-3xl font-bold text-indigo-900 mb-2">
-                        Measurement ⇄ Transmission Converter
-                    </h1>
-                    <p class="text-gray-600 mb-6">
-                        Master the art of converting between measurement values and transmission signals (4-20 mA)
-                    </p>
-
-                    <div class="bg-indigo-50 rounded-lg p-6 mb-6">
-                        <h2 class="text-lg font-semibold text-indigo-900 mb-4">Instrument Range Setup</h2>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Min Value</label>
-                                <input
-                                    type="number"
-                                    id="rangeMin"
-                                    value="${rangeMin}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Max Value</label>
-                                <input
-                                    type="number"
-                                    id="rangeMax"
-                                    value="${rangeMax}"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Units</label>
-                                <select
-                                    id="units"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option ${units === 'PSI' ? 'selected' : ''}>PSI</option>
-                                    <option ${units === '°F' ? 'selected' : ''}>°F</option>
-                                    <option ${units === '°C' ? 'selected' : ''}>°C</option>
-                                    <option ${units === 'GPM' ? 'selected' : ''}>GPM</option>
-                                    <option ${units === '%' ? 'selected' : ''}>%</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${!quizMode ? `
-                        <div class="flex gap-4 mb-6">
-                            <button
-                                id="mToTBtn"
-                                class="flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                                    mode === 'mToT'
-                                        ? 'bg-indigo-600 text-white shadow-lg'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }"
-                            >
-                                <span class="icon">⚡</span>
-                                Measurement → Transmission
-                            </button>
-                            <button
-                                id="tToMBtn"
-                                class="flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                                    mode === 'tToM'
-                                        ? 'bg-indigo-600 text-white shadow-lg'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }"
-                            >
-                                <span class="icon">📈</span>
-                                Transmission → Measurement
-                            </button>
-                        </div>
-                    ` : ''}
-
-                    ${!quizMode ? `
-                        <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                            <div class="flex items-center gap-4">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        ${mode === 'mToT' ? `Enter Measurement (${units})` : 'Enter Transmission (mA)'}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        id="inputValue"
-                                        value="${inputValue}"
-                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-lg"
-                                        placeholder="${mode === 'mToT' ? `${rangeMin}-${rangeMax}` : '4-20'}"
-                                    />
-                                </div>
-                                <span class="text-indigo-600 mt-6 icon">⇄</span>
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        ${mode === 'mToT' ? 'Transmission (mA)' : `Measurement (${units})`}
-                                    </label>
-                                    <div class="px-4 py-3 bg-white border-2 border-indigo-300 rounded-lg text-lg font-semibold text-indigo-900">
-                                        ${result || '---'}
-                                    </div>
-                                </div>
-                            </div>
-                            <button
-                                id="calculateBtn"
-                                class="w-full mt-4 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
-                            >
-                                Calculate
-                            </button>
-                        </div>
-                    ` : ''}
-
-                    ${quizMode ? `
-                        <div class="bg-yellow-50 rounded-lg p-6 mb-6 border-2 border-yellow-300">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-semibold text-yellow-900">🎯 Quiz Challenge</h3>
-                                <button
-                                    id="backToCalcBtn"
-                                    class="text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-yellow-100 transition-colors"
-                                >
-                                    ← Back to Calculator
-                                </button>
-                            </div>
-                            <p class="text-gray-700 mb-4">
-                                If the measurement is <span class="font-bold text-2xl text-indigo-900">${inputValue} ${units}</span>, what should the transmission signal be?
-                            </p>
-                            <div class="flex gap-4 items-end">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Your Answer (mA)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        id="quizAnswer"
-                                        value="${quizAnswer}"
-                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 text-lg"
-                                        placeholder="Enter mA value"
-                                    />
-                                </div>
-                                <button
-                                    id="checkQuizBtn"
-                                    class="bg-yellow-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
-                                >
-                                    Check Answer
-                                </button>
-                            </div>
-                            
-                            ${quizFeedback ? `
-                                <div class="mt-4 p-4 rounded-lg flex items-center gap-3 ${
-                                    quizFeedback.correct ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'
-                                }">
-                                    <span class="icon text-xl">${quizFeedback.correct ? '✅' : '❌'}</span>
-                                    <div>
-                                        <p class="font-semibold">
-                                            ${quizFeedback.correct ? '✓ Correct!' : '✗ Not quite right'}
-                                        </p>
-                                        <p>The correct answer is ${quizFeedback.answer} mA</p>
-                                    </div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    ` : ''}
-
-                    ${showExplanation && result && !quizMode ? `
-                        <div class="bg-green-50 rounded-lg p-6 mb-6 border-2 border-green-300">
-                            <h3 class="text-lg font-semibold text-green-900 mb-3">📖 How This Works</h3>
-                            ${mode === 'mToT' ? `
-                                <div class="text-gray-700 space-y-2">
-                                    <p><strong>Checking Transmitter:</strong> At ${inputValue} ${units}, the transmitter should output ${result} mA.</p>
-                                    <p class="text-sm">Formula: ${TRANS_MIN} + ((Value - ${rangeMin}) / ${rangeMax - rangeMin}) × ${TRANS_MAX - TRANS_MIN} = ${result} mA</p>
-                                    <p class="text-sm text-green-800 mt-3">
-                                        <strong>Real-world use:</strong> If your transmitter reads ${inputValue} ${units} but outputs a different mA signal, it needs calibration or repair.
-                                    </p>
-                                </div>
-                            ` : `
-                                <div class="text-gray-700 space-y-2">
-                                    <p><strong>Checking Receiver:</strong> A ${inputValue} mA signal should display ${result} ${units}.</p>
-                                    <p class="text-sm">Formula: ${rangeMin} + ((${inputValue} - ${TRANS_MIN}) / ${TRANS_MAX - TRANS_MIN}) × ${rangeMax - rangeMin} = ${result} ${units}</p>
-                                    <p class="text-sm text-green-800 mt-3">
-                                        <strong>Real-world use:</strong> Inject a ${inputValue} mA test signal into the receiver. It should display ${result} ${units}.
-                                    </p>
-                                </div>
-                            `}
-                        </div>
-                    ` : ''}
-
-                    <button
-                        id="quizBtn"
-                        class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-colors"
-                    >
-                        <span class="icon">🎲</span> Generate Practice Problem
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Quick Reference</h2>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h3 class="font-semibold text-blue-900 mb-2">Standard Transmission</h3>
-                            <p class="text-sm text-gray-700">4 mA = Minimum measurement</p>
-                            <p class="text-sm text-gray-700">20 mA = Maximum measurement</p>
-                            <p class="text-sm text-gray-700">12 mA = Mid-range (50%)</p>
-                        </div>
-                        <div class="bg-purple-50 p-4 rounded-lg">
-                            <h3 class="font-semibold text-purple-900 mb-2">Troubleshooting Tips</h3>
-                            <p class="text-sm text-gray-700">• 3.8 mA or below = Wire break</p>
-                            <p class="text-sm text-gray-700">• 21+ mA = Fault or over-range</p>
-                            <p class="text-sm text-gray-700">• Drifting signal = Calibration needed</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // --- ATTACH EVENT LISTENERS (crucial for functionality) ---
-
-            // Instrument Range Inputs
-            document.getElementById('rangeMin').onchange = (e) => updateState({ rangeMin: parseFloat(e.target.value) || 0 });
-            document.getElementById('rangeMax').onchange = (e) => updateState({ rangeMax: parseFloat(e.target.value) || 0 });
-            document.getElementById('units').onchange = (e) => updateState({ units: e.target.value });
-
-            if (!quizMode) {
-                // Mode Buttons
-                document.getElementById('mToTBtn').onclick = () => updateState({ mode: 'mToT', result: null, showExplanation: false });
-                document.getElementById('tToMBtn').onclick = () => updateState({ mode: 'tToM', result: null, showExplanation: false });
+        
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.classList.add('inactive');
+                });
+                this.classList.remove('inactive');
+                this.classList.add('active');
                 
-                // Calculator Input and Button
-                document.getElementById('inputValue').oninput = (e) => updateState({ inputValue: e.target.value });
-                document.getElementById('calculateBtn').onclick = handleCalculate;
+                currentMode = this.dataset.mode;
+                updateLabels();
+                document.getElementById('result').textContent = '---';
+                document.getElementById('explanation').classList.add('hidden');
+            });
+        });
+        
+        function calculate() {
+            const input = document.getElementById('inputValue').value;
+            if (!input) return;
+            
+            const { min, max, units } = getRangeValues();
+            let result;
+            let explanationHTML;
+            
+            if (currentMode === 'mToT') {
+                result = calculateTransmission(parseFloat(input));
+                explanationHTML = `
+                    <p><strong>Checking Transmitter:</strong> At ${input} ${units}, the transmitter should output ${result} mA.</p>
+                    <p class="formula">Formula: 4 + ((Value - ${min}) / ${max - min}) × 16 = ${result} mA</p>
+                    <p class="real-world"><strong>Real-world use:</strong> If your transmitter reads ${input} ${units} but outputs a different mA signal, it needs calibration or repair.</p>
+                `;
+            } else {
+                result = calculateMeasurement(parseFloat(input));
+                explanationHTML = `
+                    <p><strong>Checking Receiver:</strong> A ${input} mA signal should display ${result} ${units}.</p>
+                    <p class="formula">Formula: ${min} + ((${input} - 4) / 16) × ${max - min} = ${result} ${units}</p>
+                    <p class="real-world"><strong>Real-world use:</strong> Inject a ${input} mA test signal into the receiver. It should display ${result} ${units}.</p>
+                `;
             }
-
-            if (quizMode) {
-                // Quiz Buttons and Input
-                document.getElementById('backToCalcBtn').onclick = () => updateState({ quizMode: false, inputValue: '', result: null, quizFeedback: null });
-                document.getElementById('quizAnswer').oninput = (e) => updateState({ quizAnswer: e.target.value });
-                document.getElementById('checkQuizBtn').onclick = checkQuizAnswer;
-            }
-
-            // Global Quiz Button
-            document.getElementById('quizBtn').onclick = generateQuiz;
+            
+            document.getElementById('result').textContent = result;
+            document.getElementById('explanationContent').innerHTML = explanationHTML;
+            document.getElementById('explanation').classList.remove('hidden');
         }
-
-        // Initial render
-        renderApp();
+        
+        function generateQuiz() {
+            const { min, max, units } = getRangeValues();
+            const randomMeas = Math.floor(Math.random() * (max - min) + min);
+            quizCorrectAnswer = calculateTransmission(randomMeas);
+            
+            document.getElementById('quizValue').textContent = `${randomMeas} ${units}`;
+            document.getElementById('quizAnswer').value = '';
+            document.getElementById('feedback').classList.add('hidden');
+            
+            document.getElementById('calculator').classList.add('hidden');
+            document.getElementById('modeButtons').classList.add('hidden');
+            document.getElementById('explanation').classList.add('hidden');
+            document.getElementById('quizBox').classList.remove('hidden');
+        }
+        
+        function exitQuiz() {
+            document.getElementById('calculator').classList.remove('hidden');
+            document.getElementById('modeButtons').classList.remove('hidden');
+            document.getElementById('quizBox').classList.add('hidden');
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('quizAnswer').value);
+            const feedback = document.getElementById('feedback');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackText = document.getElementById('feedbackText');
+            
+            if (Math.abs(userAnswer - parseFloat(quizCorrectAnswer)) < 0.1) {
+                feedback.classList.remove('incorrect');
+                feedback.classList.add('correct');
+                feedbackIcon.textContent = '✓';
+                feedbackText.innerHTML = `<p><strong>Correct!</strong></p><p>The correct answer is ${quizCorrectAnswer} mA</p>`;
+            } else {
+                feedback.classList.remove('correct');
+                feedback.classList.add('incorrect');
+                feedbackIcon.textContent = '✗';
+                feedbackText.innerHTML = `<p><strong>Not quite right</strong></p><p>The correct answer is ${quizCorrectAnswer} mA</p>`;
+            }
+            
+            feedback.classList.remove('hidden');
+        }
+        
+        document.getElementById('rangeMin').addEventListener('input', updateLabels);
+        document.getElementById('rangeMax').addEventListener('input', updateLabels);
+        document.getElementById('units').addEventListener('change', updateLabels);
+        
+        document.getElementById('inputValue').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') calculate();
+        });
+        
+        document.getElementById('quizAnswer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAnswer();
+        });
     </script>
 </body>
 </html>
