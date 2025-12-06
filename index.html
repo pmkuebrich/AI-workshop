@@ -90,7 +90,7 @@
         
         .mode-btn {
             flex: 1;
-            padding: 12px 16px;
+            padding: 6px 6px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
@@ -262,18 +262,26 @@
         
         .quiz-input-row {
             display: flex;
-            gap: 16px;
+            gap: 1px;
             align-items: flex-end;
         }
         
         .quiz-input-row > div {
-            flex: 1;
+            flex: 5;
+        }
+        
+        .quiz-input-row input {
+            font-size: 20px;
+            padding: 16px;
         }
         
         .btn-check {
             background: #d97706;
             color: white;
-            padding: 12px 24px;
+            padding: 8px 12px;
+            flex: 0 0 auto;
+            font-size: 12px;
+            white-space: nowrap;
         }
         
         .btn-check:hover {
@@ -436,15 +444,15 @@
                     <h3>🎯 Quiz Challenge</h3>
                     <button class="back-btn" onclick="exitQuiz()">← Back to Calculator</button>
                 </div>
-                <p class="quiz-question">
+                <p class="quiz-question" id="quizQuestion">
                     If the measurement is <span class="quiz-value" id="quizValue">50 PSI</span>, what should the transmission signal be?
                 </p>
                 <div class="quiz-input-row">
                     <div>
-                        <label for="quizAnswer">Your Answer (mA)</label>
+                        <label for="quizAnswer" id="quizAnswerLabel">Your Answer (mA)</label>
                         <input type="number" step="0.01" id="quizAnswer" placeholder="Enter mA value">
                     </div>
-                    <button class="btn btn-check" onclick="checkAnswer()">Check Answer</button>
+                    <button class="btn btn-check" onclick="checkAnswer()">Check</button>
                 </div>
                 <div id="feedback" class="feedback hidden">
                     <span class="feedback-icon" id="feedbackIcon"></span>
@@ -485,6 +493,7 @@
     <script>
         let currentMode = 'mToT';
         let quizCorrectAnswer = null;
+        let quizMode = 'mToT'; // Track which direction the quiz is testing
         const TRANS_MIN = 4;
         const TRANS_MAX = 20;
         
@@ -575,10 +584,28 @@
         
         function generateQuiz() {
             const { min, max, units } = getRangeValues();
-            const randomMeas = Math.floor(Math.random() * (max - min) + min);
-            quizCorrectAnswer = calculateTransmission(randomMeas);
             
-            document.getElementById('quizValue').textContent = `${randomMeas} ${units}`;
+            // Randomly choose between measurement->transmission or transmission->measurement
+            quizMode = Math.random() > 0.5 ? 'mToT' : 'tToM';
+            
+            if (quizMode === 'mToT') {
+                const randomMeas = Math.floor(Math.random() * (max - min) + min);
+                quizCorrectAnswer = calculateTransmission(randomMeas);
+                
+                document.getElementById('quizQuestion').innerHTML = 
+                    `If the measurement is <span class="quiz-value">${randomMeas} ${units}</span>, what should the transmission signal be?`;
+                document.getElementById('quizAnswerLabel').textContent = 'Your Answer (mA)';
+                document.getElementById('quizAnswer').placeholder = 'Enter mA value';
+            } else {
+                const randomTrans = (Math.random() * (TRANS_MAX - TRANS_MIN) + TRANS_MIN).toFixed(2);
+                quizCorrectAnswer = calculateMeasurement(parseFloat(randomTrans));
+                
+                document.getElementById('quizQuestion').innerHTML = 
+                    `If the transmission signal is <span class="quiz-value">${randomTrans} mA</span>, what should the measurement be?`;
+                document.getElementById('quizAnswerLabel').textContent = `Your Answer (${units})`;
+                document.getElementById('quizAnswer').placeholder = `Enter ${units} value`;
+            }
+            
             document.getElementById('quizAnswer').value = '';
             document.getElementById('feedback').classList.add('hidden');
             
@@ -595,21 +622,24 @@
         }
         
         function checkAnswer() {
+            const { units } = getRangeValues();
             const userAnswer = parseFloat(document.getElementById('quizAnswer').value);
             const feedback = document.getElementById('feedback');
             const feedbackIcon = document.getElementById('feedbackIcon');
             const feedbackText = document.getElementById('feedbackText');
             
+            const suffix = quizMode === 'mToT' ? ' mA' : ` ${units}`;
+            
             if (Math.abs(userAnswer - parseFloat(quizCorrectAnswer)) < 0.1) {
                 feedback.classList.remove('incorrect');
                 feedback.classList.add('correct');
                 feedbackIcon.textContent = '✓';
-                feedbackText.innerHTML = `<p><strong>Correct!</strong></p><p>The correct answer is ${quizCorrectAnswer} mA</p>`;
+                feedbackText.innerHTML = `<p><strong>Correct!</strong></p><p>The correct answer is ${quizCorrectAnswer}${suffix}</p>`;
             } else {
                 feedback.classList.remove('correct');
                 feedback.classList.add('incorrect');
                 feedbackIcon.textContent = '✗';
-                feedbackText.innerHTML = `<p><strong>Not quite right</strong></p><p>The correct answer is ${quizCorrectAnswer} mA</p>`;
+                feedbackText.innerHTML = `<p><strong>Not quite right</strong></p><p>The correct answer is ${quizCorrectAnswer}${suffix}</p>`;
             }
             
             feedback.classList.remove('hidden');
